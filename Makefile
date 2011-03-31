@@ -1,3 +1,3 @@
 all:
-	gcc glxgears.c -o glxgears -lGL
+	gcc glxgears.c tracker.c -o glxgears -lGL -lcwiid
 

@@ -39,6 +39,7 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 
+#include "tracker.h"
 
 #define BENCHMARK
 
@@ -78,6 +79,7 @@ current_time(void)
 
 
 static GLfloat view_rotx = 20.0, view_roty = 30.0, view_rotz = 0.0;
+static GLfloat d_rho = 0, d_rotx = 0, d_roty=0;
 static GLint gear1, gear2, gear3;
 static GLfloat angle = 0.0;
 
@@ -227,8 +229,11 @@ draw(void)
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    glPushMatrix();
+	glTranslatef(0,0,d_rho);
    glRotatef(view_rotx, 1.0, 0.0, 0.0);
+   glRotatef(d_rotx, 1.0, 0.0, 0.0);
    glRotatef(view_roty, 0.0, 1.0, 0.0);
+   glRotatef(d_roty, 0.0, 1.0, 0.0);
    glRotatef(view_rotz, 0.0, 0.0, 1.0);
 
    glPushMatrix();
@@ -303,6 +308,8 @@ init(void)
    glEndList();
 
    glEnable(GL_NORMALIZE);
+
+	init_tracker();
 }
 
 
@@ -422,6 +429,7 @@ event_loop(Display *dpy, Window win)
       /* next frame */
       angle += 2.0;
 
+		tracker(&d_rho,&d_rotx,&d_roty);
       draw();
       glXSwapBuffers(dpy, win);
 
@@ -494,6 +502,8 @@ main(int argc, char *argv[])
    glXDestroyContext(dpy, ctx);
    XDestroyWindow(dpy, win);
    XCloseDisplay(dpy);
+
+	close_tracker();
 
    return 0;
 }
