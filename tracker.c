@@ -45,7 +45,8 @@ void callback(cwiid_wiimote_t *wiimote, int mesg_count,
 				int wiimote_pos_x = mesg[i].ir_mesg.src[0].pos[CWIID_X];
 				int wiimote_pos_y = mesg[i].ir_mesg.src[0].pos[CWIID_Y];
 
-				dd_rotx = -0.5f + float(wiimote_pos_x)/WIIMOTE_WIDTH;
+				dd_rotx = 5 * (-0.5f + float(wiimote_pos_x)/WIIMOTE_WIDTH);
+				dd_roty = 5 * (-0.5f + float(wiimote_pos_y)/WIIMOTE_WIDTH);
 			}
 			break;
 		}
@@ -94,8 +95,6 @@ void tracker(GLfloat* d_rho, GLfloat* d_rotx, GLfloat* d_roty)
 	*d_roty += dd_roty;
 
 	dd_rho = 0;
-	dd_rotx = 0;
-	dd_roty = 0;
 }
 
 void close_tracker()
