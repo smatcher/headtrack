@@ -15,7 +15,7 @@ cwiid_err_t err;
 
 cwiid_wiimote_t* wiimote = NULL;
 
-float dd_rotx = 0, dd_roty = 0, dd_rho=0;
+float dd_rotx = 0, dd_roty = 0, dd_rho=5;
 
 void callback(cwiid_wiimote_t *wiimote, int mesg_count,
               union cwiid_mesg mesg[], struct timespec *timestamp)
@@ -27,9 +27,9 @@ void callback(cwiid_wiimote_t *wiimote, int mesg_count,
  
 		case CWIID_MESG_BTN:
 			if(mesg[i].btn_mesg.buttons & CWIID_BTN_LEFT)
-				(dd_roty) -= 5;
+				(dd_roty) -= 30;
 			if(mesg[i].btn_mesg.buttons & CWIID_BTN_RIGHT)
-				(dd_roty) += 5;
+				(dd_roty) += 30;
 			if(mesg[i].btn_mesg.buttons & CWIID_BTN_UP)
 				(dd_rho) += 1;
 			if(mesg[i].btn_mesg.buttons & CWIID_BTN_DOWN)
@@ -37,16 +37,16 @@ void callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			break;
 		case CWIID_MESG_IR:
 		{
-			bool valid_source = bool(mesg[i].ir_mesg.src[0].valid);
-			bool updated = false;
+			char valid_source = mesg[i].ir_mesg.src[0].valid;
+			char updated = 0;
  
 			if(valid_source)
 			{
 				int wiimote_pos_x = mesg[i].ir_mesg.src[0].pos[CWIID_X];
 				int wiimote_pos_y = mesg[i].ir_mesg.src[0].pos[CWIID_Y];
 
-				dd_rotx = 5 * (-0.5f + float(wiimote_pos_x)/WIIMOTE_WIDTH);
-				dd_roty = 5 * (-0.5f + float(wiimote_pos_y)/WIIMOTE_WIDTH);
+				dd_roty = 60 * (-0.5f + (float)wiimote_pos_x/WIIMOTE_WIDTH);
+				dd_rotx = 60 * (-0.5f + (float)wiimote_pos_y/WIIMOTE_WIDTH);
 			}
 			break;
 		}
@@ -90,11 +90,9 @@ void init_tracker()
 
 void tracker(GLfloat* d_rho, GLfloat* d_rotx, GLfloat* d_roty)
 {
-	*d_rho += dd_rho;
-	*d_rotx += dd_rotx;
-	*d_roty += dd_roty;
-
-	dd_rho = 0;
+	*d_rho = dd_rho;
+	*d_rotx = dd_rotx;
+	*d_roty = dd_roty;
 }
 
 void close_tracker()
