@@ -15,7 +15,7 @@ cwiid_err_t err;
 
 cwiid_wiimote_t* wiimote = NULL;
 
-float dd_rotx = 0, dd_roty = 0, dd_rho=5;
+float dd_rotx = 0, dd_roty = 0, dd_rho=0;
 
 void callback(cwiid_wiimote_t *wiimote, int mesg_count,
               union cwiid_mesg mesg[], struct timespec *timestamp)
@@ -37,16 +37,40 @@ void callback(cwiid_wiimote_t *wiimote, int mesg_count,
 			break;
 		case CWIID_MESG_IR:
 		{
-			char valid_source = mesg[i].ir_mesg.src[0].valid;
+			char valid_source1 = mesg[i].ir_mesg.src[0].valid;
+			char valid_source2 = mesg[i].ir_mesg.src[1].valid;
 			char updated = 0;
  
-			if(valid_source)
+			if(valid_source1)
 			{
-				int wiimote_pos_x = mesg[i].ir_mesg.src[0].pos[CWIID_X];
-				int wiimote_pos_y = mesg[i].ir_mesg.src[0].pos[CWIID_Y];
+				if(!valid_source2)
+				{
+					int wiimote_pos_x = mesg[i].ir_mesg.src[0].pos[CWIID_X];
+					int wiimote_pos_y = mesg[i].ir_mesg.src[0].pos[CWIID_Y];
 
-				dd_roty = 60 * (-0.5f + (float)wiimote_pos_x/WIIMOTE_WIDTH);
-				dd_rotx = 60 * (-0.5f + (float)wiimote_pos_y/WIIMOTE_WIDTH);
+					dd_roty = 60 * (-0.5f + (float)wiimote_pos_x/WIIMOTE_WIDTH);
+					dd_rotx = 60 * (-0.5f + (float)wiimote_pos_y/WIIMOTE_WIDTH);
+					printf("lost\n");
+				}
+				else
+				{
+					int wiimote1_pos_x = mesg[i].ir_mesg.src[0].pos[CWIID_X];
+					int wiimote1_pos_y = mesg[i].ir_mesg.src[0].pos[CWIID_Y];
+					int wiimote2_pos_x = mesg[i].ir_mesg.src[1].pos[CWIID_X];
+					int wiimote2_pos_y = mesg[i].ir_mesg.src[1].pos[CWIID_Y];
+
+					int wiimote_pos_x = (wiimote1_pos_x + wiimote2_pos_x) / 2;
+					int wiimote_pos_y = (wiimote1_pos_y + wiimote2_pos_y) / 2;
+					int wiimote_distx = (wiimote1_pos_x - wiimote2_pos_x);
+					int wiimote_disty = (wiimote1_pos_y - wiimote2_pos_y);
+					int wiimote_dist2 = (wiimote_distx * wiimote_distx)
+					                  + (wiimote_disty * wiimote_disty);
+
+					dd_roty = 60 * (-0.5f + (float)wiimote_pos_x/WIIMOTE_WIDTH);
+					dd_rotx = 60 * (-0.5f + (float)wiimote_pos_y/WIIMOTE_HEIGHT);
+//					dd_rho  = 10 + WIIMOTE_HEIGHT * WIIMOTE_WIDTH * 5 / (wiimote_dist2 + 1.0);
+					printf("%f\n",dd_rho);
+				}
 			}
 			break;
 		}
